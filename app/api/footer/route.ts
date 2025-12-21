@@ -127,21 +127,17 @@ export async function GET() {
       if (settingsMap.contact_address_line2) {
         contactLinks.push({ order: 2, label: settingsMap.contact_address_line2, href: null, type: "address" });
       }
-      if (settingsMap.contact_whatsapp) {
-        const phone = settingsMap.contact_whatsapp.replace(/[^0-9+]/g, '');
-        contactLinks.push({ order: 3, label: settingsMap.contact_whatsapp, href: `https://wa.me/${phone.replace('+', '')}`, type: "whatsapp" });
-      }
       if (settingsMap.contact_email) {
-        contactLinks.push({ order: 4, label: settingsMap.contact_email, href: `mailto:${settingsMap.contact_email}`, type: "email" });
+        contactLinks.push({ order: 3, label: settingsMap.contact_email, href: `mailto:${settingsMap.contact_email}`, type: "email" });
       }
       if (settingsMap.social_pinterest) {
-        contactLinks.push({ order: 5, label: "Pinterest", href: settingsMap.social_pinterest, type: "social" });
+        contactLinks.push({ order: 4, label: "Pinterest", href: settingsMap.social_pinterest, type: "social" });
       }
       if (settingsMap.social_instagram) {
-        contactLinks.push({ order: 6, label: "Instagram", href: settingsMap.social_instagram, type: "social" });
+        contactLinks.push({ order: 5, label: "Instagram", href: settingsMap.social_instagram, type: "social" });
       }
       if (settingsMap.social_youtube) {
-        contactLinks.push({ order: 7, label: "YouTube", href: settingsMap.social_youtube, type: "social" });
+        contactLinks.push({ order: 6, label: "YouTube", href: settingsMap.social_youtube, type: "social" });
       }
     } catch (e) {
       console.warn("Could not fetch Website_Settings for contact info:", e);
