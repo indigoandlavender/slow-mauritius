@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSheetData, convertDriveUrl } from "@/lib/sheets";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const journeys = await getSheetData("Website_Journeys");
