@@ -31,7 +31,7 @@ export default function PlanYourTripForm({
     travelers: "",
     days: "",
     language: "",
-    budget: "",
+    budgetValue: 5000,
     requests: "",
     firstName: "",
     lastName: "",
@@ -54,7 +54,8 @@ export default function PlanYourTripForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          ...formData, 
+          ...formData,
+          budget: formData.budgetValue, // Send as budget for backend
           site_id: siteId, // Secret identifier for backend
         }),
       });
@@ -93,13 +94,9 @@ export default function PlanYourTripForm({
     "Arabic"
   ];
 
-  const budgetOptions = [
-    "$1,500 - $2,500",
-    "$2,500 - $4,000",
-    "$4,000 - $6,000",
-    "$6,000 - $10,000",
-    "$10,000+"
-  ];
+  const formatBudget = (value: number) => {
+    return `€${value.toLocaleString()}`;
+  };
 
   const hearAboutOptions = [
     "Google Search",
@@ -298,23 +295,39 @@ export default function PlanYourTripForm({
         </div>
       </div>
 
-      {/* Budget */}
+      {/* Budget Slider */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className="block text-sm tracking-wide mb-4">
           Approximate budget per person?
         </label>
-        <div className="relative">
-          <select
-            value={formData.budget}
-            onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-            className={selectStyle}
-          >
-            <option value="">Select</option>
-            {budgetOptions.map((budget) => (
-              <option key={budget} value={budget}>{budget}</option>
-            ))}
-          </select>
-          <DropdownArrow />
+        <div className="pt-2">
+          <input
+            type="range"
+            min="1000"
+            max="15000"
+            step="500"
+            value={formData.budgetValue}
+            onChange={(e) => setFormData({ ...formData, budgetValue: parseInt(e.target.value) })}
+            className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer
+              [&::-webkit-slider-thumb]:appearance-none
+              [&::-webkit-slider-thumb]:w-4
+              [&::-webkit-slider-thumb]:h-4
+              [&::-webkit-slider-thumb]:rounded-full
+              [&::-webkit-slider-thumb]:bg-[#4a5043]
+              [&::-webkit-slider-thumb]:cursor-pointer
+              [&::-webkit-slider-thumb]:shadow-md
+              [&::-moz-range-thumb]:w-4
+              [&::-moz-range-thumb]:h-4
+              [&::-moz-range-thumb]:rounded-full
+              [&::-moz-range-thumb]:bg-[#4a5043]
+              [&::-moz-range-thumb]:cursor-pointer
+              [&::-moz-range-thumb]:border-0"
+          />
+          <div className="flex justify-between mt-3 text-xs text-muted-foreground">
+            <span>€1,000</span>
+            <span className="text-foreground font-medium text-sm">{formatBudget(formData.budgetValue)}</span>
+            <span>€15,000</span>
+          </div>
         </div>
       </div>
 
