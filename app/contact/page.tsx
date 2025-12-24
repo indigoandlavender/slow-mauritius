@@ -29,13 +29,13 @@ export default function ContactPage() {
       <Header />
 
       {/* Contact Form Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-28">
+      <section className="pt-40 pb-20 md:pt-52 md:pb-28">
         <div className="container mx-auto px-6 lg:px-16 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
             
             {/* Left - Title */}
             <div>
-              <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight">
+              <h1 className="font-display italic text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-foreground/90">
                 SEND
                 <br />
                 US
