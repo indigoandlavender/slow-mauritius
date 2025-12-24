@@ -56,7 +56,7 @@ const config: Config = {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         serif: ["Libre Baskerville", "serif"],
-        display: ["Cormorant Garamond", "serif"],
+        display: ["Playfair Display", "serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
