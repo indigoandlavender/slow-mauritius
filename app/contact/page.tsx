@@ -35,7 +35,7 @@ export default function ContactPage() {
             
             {/* Left - Title */}
             <div>
-              <h1 className="font-display italic text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-tight text-foreground/90">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground/90 leading-[1.1]">
                 SEND
                 <br />
                 US
