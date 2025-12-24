@@ -28,26 +28,14 @@ export default function ContactPage() {
     <div className="bg-background min-h-screen">
       <Header />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-28 bg-muted">
-        <div className="container mx-auto px-6 lg:px-16 text-center max-w-4xl">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-[0.3em] font-light mb-8">
-            C O N T A C T
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground">
-            We'd love to hear from you.
-          </p>
-        </div>
-      </section>
-
       {/* Contact Form Section */}
-      <section className="py-20 md:py-28">
+      <section className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="container mx-auto px-6 lg:px-16 max-w-6xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
             
             {/* Left - Title */}
             <div>
-              <h2 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight">
+              <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-none tracking-tight">
                 SEND
                 <br />
                 US
@@ -55,7 +43,7 @@ export default function ContactPage() {
                 A
                 <br />
                 NOTE.
-              </h2>
+              </h1>
             </div>
 
             {/* Right - Form */}
