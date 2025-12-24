@@ -69,12 +69,12 @@ interface SiteConfig {
   parentBrand?: string; // For "Powered by" - only moons and microsites
 }
 
-// Slow Mauritius is a Planet (commercial)
+// Slow Morocco is a Planet (commercial)
 const siteConfig: SiteConfig = {
-  siteId: "slow-mauritius",
+  siteId: "slow-morocco",
   siteType: "planet",
   siteCategory: "commercial",
-  brandName: "Slow Mauritius",
+  brandName: "Slow Morocco",
   // No parentBrand - planets are the parent
 };
 
@@ -195,12 +195,37 @@ export default function Footer() {
       });
   }, []);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const [subscribeMessage, setSubscribeMessage] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Connect to newsletter service
-    console.log("Subscribe:", email);
-    setSubscribed(true);
-    setEmail("");
+    if (!email.trim() || isSubscribing) return;
+    
+    setIsSubscribing(true);
+    
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubscribed(true);
+        setSubscribeMessage(data.message);
+        setEmail("");
+      } else {
+        setSubscribeMessage(data.message || "Something went wrong.");
+      }
+    } catch (error) {
+      console.error("Newsletter subscription error:", error);
+      setSubscribeMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -231,24 +256,31 @@ export default function Footer() {
             </p>
             
             {subscribed ? (
-              <p className="text-white/90">Thank you for subscribing.</p>
+              <p className="text-white/90">{subscribeMessage || "You're in."}</p>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto items-end">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email"
-                  required
-                  className="flex-1 px-0 py-3 bg-transparent border-0 border-b border-white/50 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-white text-foreground text-xs tracking-[0.15em] uppercase hover:bg-white/90 transition-colors"
-                >
-                  Subscribe
-                </button>
-              </form>
+              <>
+                <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto items-end">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Your email"
+                    required
+                    disabled={isSubscribing}
+                    className="flex-1 px-0 py-3 bg-transparent border-0 border-b border-white/50 text-white placeholder:text-white/50 focus:outline-none focus:border-white transition-colors disabled:opacity-50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubscribing}
+                    className="px-6 py-3 bg-white text-foreground text-xs tracking-[0.15em] uppercase hover:bg-white/90 transition-colors disabled:opacity-50"
+                  >
+                    {isSubscribing ? "..." : "Subscribe"}
+                  </button>
+                </form>
+                {subscribeMessage && !subscribed && (
+                  <p className="text-white/70 text-sm mt-3">{subscribeMessage}</p>
+                )}
+              </>
             )}
           </div>
         </section>
@@ -282,7 +314,7 @@ export default function Footer() {
                         S L O W
                       </span>
                       <span className="font-serif text-sm tracking-[0.2em] text-white/90 block">
-                        M A U R I T I U S
+                        M O R O C C O
                       </span>
                     </div>
                   ) : (

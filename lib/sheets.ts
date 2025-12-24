@@ -149,3 +149,171 @@ export async function getNextId(prefix: string, tabName: string) {
   const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
   return `${prefix}${String(maxId + 1).padStart(3, "0")}`;
 }
+
+// ============================================
+// NEWSLETTER SUBSCRIPTION SYSTEM
+// ============================================
+
+const SITE_ID = process.env.SITE_ID || "slow-morocco";
+
+// Brand name mapping for newsletter
+const BRAND_NAMES: Record<string, string> = {
+  'slow-morocco': 'Slow Morocco',
+  'slow-namibia': 'Slow Namibia',
+  'slow-turkiye': 'Slow Türkiye',
+  'slow-tunisia': 'Slow Tunisia',
+  'slow-mauritius': 'Slow Mauritius',
+  'riad-di-siena': 'Riad di Siena',
+  'dancing-with-lions': 'Dancing with Lions',
+  'slow-world': 'Slow World',
+};
+
+// Generate random unsubscribe token
+function generateUnsubscribeToken(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  for (let i = 0; i < 32; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
+}
+
+// Subscribe to newsletter
+export async function subscribeToNewsletter(
+  email: string,
+  brand?: string
+): Promise<{ success: boolean; message: string; isResubscribe?: boolean }> {
+  if (!NEXUS_SHEET_ID) {
+    console.error("[Newsletter] NEXUS_SHEET_ID not configured");
+    return { success: false, message: "Configuration error" };
+  }
+
+  const brandName = brand || BRAND_NAMES[SITE_ID] || SITE_ID;
+  
+  console.log("[Newsletter] Subscribing:", { email, brandName, SITE_ID, NEXUS_SHEET_ID });
+
+  try {
+    const sheets = getGoogleSheetsClient();
+
+    // Check if already subscribed
+    const existingRows = await sheets.spreadsheets.values.get({
+      spreadsheetId: NEXUS_SHEET_ID,
+      range: "Newsletter_Subscribers!A1:F",
+    });
+
+    const rows = existingRows.data.values || [];
+    const headers = rows[0] || [];
+    const emailIndex = headers.indexOf("email");
+    const brandIndex = headers.indexOf("brand");
+    const statusIndex = headers.indexOf("status");
+
+    // Find existing subscription for this email + brand
+    let existingRowIndex = -1;
+    let existingStatus = "";
+    
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][emailIndex]?.toLowerCase() === email.toLowerCase() && 
+          rows[i][brandIndex] === brandName) {
+        existingRowIndex = i;
+        existingStatus = rows[i][statusIndex];
+        break;
+      }
+    }
+
+    const now = new Date().toISOString();
+    const token = generateUnsubscribeToken();
+
+    if (existingRowIndex > 0) {
+      if (existingStatus === "active") {
+        console.log("[Newsletter] Already subscribed:", email);
+        return { success: true, message: "You're already subscribed." };
+      }
+      
+      // Reactivate subscription
+      console.log("[Newsletter] Reactivating subscription:", email);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: NEXUS_SHEET_ID,
+        range: `Newsletter_Subscribers!D${existingRowIndex + 1}`,
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [["active"]],
+        },
+      });
+      
+      return { success: true, message: "Welcome back.", isResubscribe: true };
+    }
+
+    // New subscription
+    console.log("[Newsletter] Adding new subscription:", email);
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: NEXUS_SHEET_ID,
+      range: "Newsletter_Subscribers!A:F",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[email, brandName, now, "active", token, ""]],
+      },
+    });
+
+    console.log("[Newsletter] Successfully subscribed:", email);
+    return { success: true, message: "You're in." };
+  } catch (error) {
+    console.error("[Newsletter] Error subscribing:", error);
+    return { success: false, message: "Something went wrong. Please try again." };
+  }
+}
+
+// Unsubscribe from newsletter
+export async function unsubscribeFromNewsletter(
+  token: string
+): Promise<{ success: boolean; message: string }> {
+  if (!NEXUS_SHEET_ID) {
+    return { success: false, message: "Configuration error" };
+  }
+
+  try {
+    const sheets = getGoogleSheetsClient();
+
+    const existingRows = await sheets.spreadsheets.values.get({
+      spreadsheetId: NEXUS_SHEET_ID,
+      range: "Newsletter_Subscribers!A1:F",
+    });
+
+    const rows = existingRows.data.values || [];
+    const headers = rows[0] || [];
+    const tokenIndex = headers.indexOf("unsubscribe_token");
+    const statusIndex = headers.indexOf("status");
+
+    // Find subscription by token
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i][tokenIndex] === token) {
+        rowIndex = i;
+        break;
+      }
+    }
+
+    if (rowIndex < 0) {
+      return { success: false, message: "Invalid or expired link." };
+    }
+
+    if (rows[rowIndex][statusIndex] === "unsubscribed") {
+      return { success: true, message: "You've already been removed." };
+    }
+
+    // Update status and add unsubscribed_at timestamp
+    const now = new Date().toISOString();
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: NEXUS_SHEET_ID,
+      range: `Newsletter_Subscribers!D${rowIndex + 1}:F${rowIndex + 1}`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [["unsubscribed", rows[rowIndex][tokenIndex], now]],
+      },
+    });
+
+    return { success: true, message: "You've been removed." };
+  } catch (error) {
+    console.error("[Newsletter] Error unsubscribing:", error);
+    return { success: false, message: "Something went wrong. Please try again." };
+  }
+}
