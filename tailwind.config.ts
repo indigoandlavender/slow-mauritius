@@ -1,5 +1,14 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * SLOW WORLD DESIGN SYSTEM - Tailwind Configuration
+ * 
+ * Shared by: Riad di Siena, Slow Morocco, Slow Namibia,
+ *            Slow Türkiye, Slow Tunisia, Slow Mauritius
+ * 
+ * Last updated: December 24, 2025
+ */
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -9,6 +18,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      /* ═══════════════════════════════════════════════════════════
+         COLORS
+         All colors use CSS variables for consistency
+         ═══════════════════════════════════════════════════════════ */
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -45,19 +58,38 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         sand: "hsl(var(--sand))",
         "footer-background": "hsl(var(--footer-background))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
-        },
+        "footer-foreground": "hsl(var(--footer-foreground))",
       },
+
+      /* ═══════════════════════════════════════════════════════════
+         TYPOGRAPHY
+         ═══════════════════════════════════════════════════════════ */
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        serif: ["Libre Baskerville", "serif"],
-        display: ["Playfair Display", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        serif: ["var(--font-display)", "Georgia", "serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
       },
+
+      /* ═══════════════════════════════════════════════════════════
+         SPACING
+         ═══════════════════════════════════════════════════════════ */
+      spacing: {
+        section: "clamp(80px, 12vh, 120px)",
+        "section-sm": "clamp(48px, 8vh, 80px)",
+      },
+
+      /* ═══════════════════════════════════════════════════════════
+         MAX WIDTHS
+         ═══════════════════════════════════════════════════════════ */
+      maxWidth: {
+        content: "680px",
+        wide: "1200px",
+      },
+
+      /* ═══════════════════════════════════════════════════════════
+         BORDER RADIUS
+         ═══════════════════════════════════════════════════════════ */
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
