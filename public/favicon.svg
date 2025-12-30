@@ -1,6 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <polygon 
-    points="16,1 19,11 29,11 21,17.5 24,28 16,21.5 8,28 11,17.5 3,11 13,11" 
-    fill="#c9a227"
-  />
+  <!-- Outer circle -->
+  <circle cx="16" cy="16" r="14" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+  
+  <!-- Compass needle - North (dark) -->
+  <polygon points="16,3 19,16 16,14 13,16" fill="#1a1a1a"/>
+  
+  <!-- Compass needle - South (light) -->
+  <polygon points="16,29 19,16 16,18 13,16" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+  
+  <!-- Center dot -->
+  <circle cx="16" cy="16" r="2" fill="#1a1a1a"/>
+  
+  <!-- Cardinal points - small ticks -->
+  <line x1="16" y1="2" x2="16" y2="5" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="30" y1="16" x2="27" y2="16" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="16" y1="30" x2="16" y2="27" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="2" y1="16" x2="5" y2="16" stroke="#1a1a1a" stroke-width="1.5"/>
 </svg>

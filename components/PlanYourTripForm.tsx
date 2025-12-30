@@ -16,6 +16,7 @@ interface PlanYourTripFormProps {
   siteId: string; // e.g., "slow-morocco", "slow-namibia" - from SITE_ID env var
   apiEndpoint?: string;
   onSuccess?: () => void;
+  darkMode?: boolean;
 }
 
 export default function PlanYourTripForm({
@@ -23,6 +24,7 @@ export default function PlanYourTripForm({
   siteId,
   apiEndpoint = "/api/plan-your-trip",
   onSuccess,
+  darkMode = false,
 }: PlanYourTripFormProps) {
   const [formData, setFormData] = useState({
     journey: "",
@@ -142,14 +144,31 @@ export default function PlanYourTripForm({
     "+31", "+41", "+971", "+212", "+91", "+81"
   ];
 
-  // Shared input styles - underline only
-  const inputStyle = "w-full px-0 py-3 border-0 border-b border-border bg-transparent focus:outline-none focus:border-foreground transition-colors";
-  const selectStyle = "w-full px-0 py-3 border-0 border-b border-border bg-transparent focus:outline-none focus:border-foreground transition-colors appearance-none cursor-pointer";
+  // Dark mode styles
+  const inputStyle = darkMode 
+    ? "w-full px-0 py-3 border-0 border-b border-white/20 bg-transparent focus:outline-none focus:border-white/60 transition-colors text-white placeholder:text-white/30"
+    : "w-full px-0 py-3 border-0 border-b border-border bg-transparent focus:outline-none focus:border-foreground transition-colors";
+  
+  const selectStyle = darkMode
+    ? "w-full px-0 py-3 border-0 border-b border-white/20 bg-transparent focus:outline-none focus:border-white/60 transition-colors appearance-none cursor-pointer text-white"
+    : "w-full px-0 py-3 border-0 border-b border-border bg-transparent focus:outline-none focus:border-foreground transition-colors appearance-none cursor-pointer";
+
+  const labelStyle = darkMode
+    ? "block text-sm tracking-wide mb-2 text-white/80"
+    : "block text-sm tracking-wide mb-2";
+
+  const subLabelStyle = darkMode
+    ? "block text-xs text-white/40 mb-1"
+    : "block text-xs text-muted-foreground mb-1";
+
+  const mutedStyle = darkMode
+    ? "text-white/40"
+    : "text-muted-foreground";
 
   // Dropdown arrow component
   const DropdownArrow = () => (
     <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
-      <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className={`w-5 h-5 ${darkMode ? 'text-white/40' : 'text-muted-foreground'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
       </svg>
     </div>
@@ -157,7 +176,7 @@ export default function PlanYourTripForm({
 
   const SmallDropdownArrow = () => (
     <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
-      <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className={`w-4 h-4 ${darkMode ? 'text-white/40' : 'text-muted-foreground'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
       </svg>
     </div>
@@ -165,12 +184,19 @@ export default function PlanYourTripForm({
 
   if (status === "success") {
     return (
-      <div className="max-w-lg text-center py-16">
-        <h2 className="font-serif text-3xl md:text-4xl mb-6">Thank You</h2>
-        <p className="text-muted-foreground text-lg mb-8">
+      <div className="max-w-lg mx-auto text-center py-16">
+        <h2 className={`font-serif text-3xl md:text-4xl mb-6 ${darkMode ? 'text-white' : ''}`}>Thank You</h2>
+        <p className={`text-lg mb-8 ${darkMode ? 'text-white/60' : 'text-muted-foreground'}`}>
           We've received your journey request and will be in touch within 24 hours, usually sooner.
         </p>
-        <a href="/" className="inline-block bg-foreground text-background px-10 py-4 text-xs tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors">
+        <a 
+          href="/" 
+          className={`inline-block px-10 py-4 text-xs tracking-[0.2em] uppercase transition-colors ${
+            darkMode 
+              ? 'border border-white/20 text-white hover:bg-white hover:text-[#0a0a0a]'
+              : 'bg-foreground text-background hover:bg-foreground/90'
+          }`}
+        >
           Back to Home
         </a>
       </div>
@@ -181,7 +207,7 @@ export default function PlanYourTripForm({
     <form onSubmit={handleSubmit} className="space-y-10">
       {/* Journey Selection */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           Which journey interests you?
         </label>
         <div className="relative">
@@ -205,7 +231,7 @@ export default function PlanYourTripForm({
 
       {/* Travel Dates */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           When are you thinking of traveling?
         </label>
         <div className="grid grid-cols-2 gap-8">
@@ -242,7 +268,7 @@ export default function PlanYourTripForm({
 
       {/* Number of Travelers */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           How many travelers?
         </label>
         <div className="relative">
@@ -263,7 +289,7 @@ export default function PlanYourTripForm({
 
       {/* Trip Length */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           How long would you like to travel?
         </label>
         <input
@@ -277,7 +303,7 @@ export default function PlanYourTripForm({
 
       {/* Language */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           Preferred guide language?
         </label>
         <div className="relative">
@@ -297,7 +323,7 @@ export default function PlanYourTripForm({
 
       {/* Budget Slider */}
       <div>
-        <label className="block text-sm tracking-wide mb-4">
+        <label className={`${labelStyle} mb-4`}>
           Approximate budget per person?
         </label>
         <div className="pt-2">
@@ -308,24 +334,29 @@ export default function PlanYourTripForm({
             step="500"
             value={formData.budgetValue}
             onChange={(e) => setFormData({ ...formData, budgetValue: parseInt(e.target.value) })}
-            className="w-full h-1 bg-border rounded-lg appearance-none cursor-pointer
+            className={`w-full h-1 rounded-lg appearance-none cursor-pointer
+              ${darkMode ? 'bg-white/20' : 'bg-border'}
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-4
               [&::-webkit-slider-thumb]:h-4
               [&::-webkit-slider-thumb]:rounded-full
-              [&::-webkit-slider-thumb]:bg-[#4a5043]
               [&::-webkit-slider-thumb]:cursor-pointer
               [&::-webkit-slider-thumb]:shadow-md
               [&::-moz-range-thumb]:w-4
               [&::-moz-range-thumb]:h-4
               [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-[#4a5043]
               [&::-moz-range-thumb]:cursor-pointer
-              [&::-moz-range-thumb]:border-0"
+              [&::-moz-range-thumb]:border-0
+              ${darkMode 
+                ? '[&::-webkit-slider-thumb]:bg-white [&::-moz-range-thumb]:bg-white' 
+                : '[&::-webkit-slider-thumb]:bg-[#4a5043] [&::-moz-range-thumb]:bg-[#4a5043]'
+              }`}
           />
-          <div className="flex justify-between mt-3 text-xs text-muted-foreground">
+          <div className={`flex justify-between mt-3 text-xs ${mutedStyle}`}>
             <span>€1,000</span>
-            <span className="text-foreground font-medium text-sm">{formatBudget(formData.budgetValue)}</span>
+            <span className={`font-medium text-sm ${darkMode ? 'text-white' : 'text-foreground'}`}>
+              {formatBudget(formData.budgetValue)}
+            </span>
             <span>€15,000</span>
           </div>
         </div>
@@ -333,7 +364,7 @@ export default function PlanYourTripForm({
 
       {/* Special Requests */}
       <div>
-        <label className="block text-sm tracking-wide mb-2">
+        <label className={labelStyle}>
           Special requests or interests
         </label>
         <textarea
@@ -346,18 +377,18 @@ export default function PlanYourTripForm({
       </div>
 
       {/* Your Information Section */}
-      <div className="pt-8 border-t border-border">
-        <h3 className="text-sm tracking-wide mb-8">Your Information</h3>
+      <div className={`pt-8 border-t ${darkMode ? 'border-white/10' : 'border-border'}`}>
+        <h3 className={`text-sm tracking-wide mb-8 ${darkMode ? 'text-white/60' : ''}`}>Your Information</h3>
 
         <div className="space-y-8">
           {/* Name */}
           <div>
-            <label className="block text-sm tracking-wide mb-2">
-              Name <span className="text-muted-foreground">(required)</span>
+            <label className={labelStyle}>
+              Name <span className={mutedStyle}>(required)</span>
             </label>
             <div className="grid grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">First Name</label>
+                <label className={subLabelStyle}>First Name</label>
                 <input
                   type="text"
                   value={formData.firstName}
@@ -367,7 +398,7 @@ export default function PlanYourTripForm({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">Last Name</label>
+                <label className={subLabelStyle}>Last Name</label>
                 <input
                   type="text"
                   value={formData.lastName}
@@ -381,8 +412,8 @@ export default function PlanYourTripForm({
 
           {/* Email */}
           <div>
-            <label className="block text-sm tracking-wide mb-2">
-              Email <span className="text-muted-foreground">(required)</span>
+            <label className={labelStyle}>
+              Email <span className={mutedStyle}>(required)</span>
             </label>
             <input
               type="email"
@@ -395,7 +426,7 @@ export default function PlanYourTripForm({
 
           {/* Country */}
           <div>
-            <label className="block text-sm tracking-wide mb-2">
+            <label className={labelStyle}>
               Country of residence
             </label>
             <div className="relative">
@@ -416,7 +447,7 @@ export default function PlanYourTripForm({
 
           {/* Phone */}
           <div>
-            <label className="block text-sm tracking-wide mb-2">
+            <label className={labelStyle}>
               Phone / WhatsApp
             </label>
             <div className="flex gap-4">
@@ -444,8 +475,8 @@ export default function PlanYourTripForm({
 
           {/* How did you hear */}
           <div>
-            <label className="block text-sm tracking-wide mb-2">
-              How did you hear about us? <span className="text-muted-foreground">(Optional)</span>
+            <label className={labelStyle}>
+              How did you hear about us? <span className={mutedStyle}>(Optional)</span>
             </label>
             <div className="relative">
               <select
@@ -466,7 +497,7 @@ export default function PlanYourTripForm({
 
       {/* Error Message */}
       {status === "error" && (
-        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3">
+        <div className={`px-4 py-3 ${darkMode ? 'bg-red-900/20 border border-red-500/50 text-red-400' : 'bg-destructive/10 border border-destructive text-destructive'}`}>
           {errorMessage}
         </div>
       )}
@@ -476,7 +507,11 @@ export default function PlanYourTripForm({
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full bg-[#c4a882] text-white py-4 text-sm tracking-wide hover:bg-[#b09670] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full py-4 text-sm tracking-[0.15em] uppercase transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            darkMode
+              ? 'border border-white/20 text-white hover:bg-white hover:text-[#0a0a0a]'
+              : 'bg-[#c4a882] text-white hover:bg-[#b09670]'
+          }`}
         >
           {status === "loading" ? "Sending..." : "Submit"}
         </button>
