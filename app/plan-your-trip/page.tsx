@@ -1,67 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import PlanYourTripForm from "@/components/PlanYourTripForm";
 
-interface Journey {
-  slug: string;
-  title: string;
-}
-
 export default function PlanYourTripPage() {
-  const [journeys, setJourneys] = useState<Journey[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [journeys, setJourneys] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch journeys for dropdown
     fetch("/api/journeys")
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data) => {
-        if (data.success) {
-          setJourneys(data.journeys || []);
-        }
-        setLoading(false);
+        setJourneys(data.journeys || []);
       })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .catch(console.error);
   }, []);
 
   return (
-    <div className="bg-background min-h-screen">
-      <Header />
-      
-      {/* Main Content */}
-      <div className="pt-20">
-        <div className="container mx-auto px-6 lg:px-16 py-16 md:py-24 max-w-2xl">
-          {/* Title */}
-          <div className="text-center mb-12">
-            <h1 className="font-serif text-4xl md:text-5xl tracking-wide mb-4">
-              Plan Your Journey
+    <div className="bg-[#0a0a0a] text-white min-h-screen">
+      {/* Hero */}
+      <section className="pt-32 pb-16 md:pt-40 md:pb-20">
+        <div className="container mx-auto px-6 lg:px-16">
+          <div className="max-w-4xl">
+            <p className="text-xs tracking-[0.4em] uppercase text-white/40 mb-6">
+              Begin The Conversation
+            </p>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl tracking-[0.15em] font-light mb-6">
+              P L A N &nbsp; Y O U R &nbsp; T R I P
             </h1>
-            <p className="text-muted-foreground italic">
-              We respond within 24 hours, usually sooner. No obligation, no sales pitch—just a conversation about what you're hoping to find.
+            <p className="text-lg md:text-xl text-white/50 max-w-2xl">
+              No commitment. No pressure. Just tell us what you're dreaming about.
             </p>
           </div>
-
-          {/* Form */}
-          {loading ? (
-            <div className="text-center py-16 text-muted-foreground">
-              Loading...
-            </div>
-          ) : (
-            <PlanYourTripForm 
-              journeys={journeys}
-              siteId="slow-morocco"
-            />
-          )}
         </div>
-      </div>
+      </section>
 
-      <Footer />
+      {/* Form Section */}
+      <section className="pb-24 md:pb-32">
+        <div className="container mx-auto px-6 lg:px-16 max-w-3xl">
+          <PlanYourTripForm 
+            journeys={journeys} 
+            siteId="slow-mauritius" 
+            darkMode={true} 
+          />
+        </div>
+      </section>
     </div>
   );
 }

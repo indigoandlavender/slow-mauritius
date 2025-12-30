@@ -5,7 +5,7 @@ import { getNexusData, getSheetData } from "@/lib/sheets";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const SITE_ID = process.env.SITE_ID || "slow-morocco";
+const SITE_ID = process.env.SITE_ID || "slow-mauritius";
 
 // Convert Google Drive sharing URL to direct image URL
 function convertGoogleDriveUrl(url: string): string {
@@ -27,22 +27,16 @@ function convertGoogleDriveUrl(url: string): string {
 
 export async function GET() {
   try {
-    // Get footer links from Nexus
-    const footerLinks = await getNexusData("Nexus_Footer_Links");
-    const siteLinks = footerLinks.filter((link: any) => link.brand_id === SITE_ID);
-    
-    // Get site info from Nexus Sites tab
-    const sites = await getNexusData("Sites");
-    const siteInfo = sites.find((s: any) => s.site_id === SITE_ID) || {};
-    
-    // Get newsletter config from Website_Settings (brand-specific, not Nexus)
+    // Get newsletter config from Website_Settings (brand-specific sheet)
     let newsletterConfig = {
       show: true,
       backgroundImage: "",
-      title: "Notes from Morocco",
+      title: "Notes from Mauritius",
       description: "Quiet. Irregular. Real.",
-      brandName: siteInfo.site_name || "Slow Morocco",
+      brandName: "Slow Mauritius",
     };
+    
+    let contactLinks: any[] = [];
     
     try {
       const settingsData = await getSheetData("Website_Settings");
@@ -56,69 +50,8 @@ export async function GET() {
         backgroundImage: convertGoogleDriveUrl(settingsMap.newsletter_background_image) || newsletterConfig.backgroundImage,
         title: settingsMap.newsletter_title || newsletterConfig.title,
         description: settingsMap.newsletter_description || newsletterConfig.description,
-        brandName: settingsMap.site_name || siteInfo.site_name || "Slow Morocco",
+        brandName: settingsMap.site_name || "Slow Mauritius",
       };
-    } catch (e) {
-      console.warn("Could not fetch Website_Settings for newsletter:", e);
-    }
-    
-    // Get legal pages from Nexus
-    const legalPages = await getNexusData("Nexus_Legal_Pages");
-    const siteLegalPages = legalPages.filter((p: any) => 
-      !p.brand_id || p.brand_id === SITE_ID || p.brand_id === "all"
-    );
-
-    // Group links by column
-    const columnMap: { [key: number]: any } = {};
-    siteLinks.forEach((link: any) => {
-      const colNum = parseInt(link.column_number) || 1;
-      if (!columnMap[colNum]) {
-        columnMap[colNum] = {
-          number: colNum,
-          title: link.column_title || "",
-          links: [],
-        };
-      }
-      columnMap[colNum].links.push({
-        order: parseInt(link.link_order) || 0,
-        label: link.link_label || "",
-        href: link.link_href || null,
-        type: link.link_type || "link",
-      });
-    });
-
-    // Sort links within each column
-    Object.values(columnMap).forEach((col: any) => {
-      col.links.sort((a: any, b: any) => a.order - b.order);
-    });
-
-    // Convert to sorted array
-    const columns = Object.values(columnMap).sort((a: any, b: any) => a.number - b.number);
-
-    // Build legal links
-    const legal = siteLegalPages
-      .filter((p: any) => p.page_slug && p.page_title)
-      .map((p: any) => ({
-        label: p.page_title,
-        href: `/${p.page_slug}`,
-      }));
-
-    // Fallback legal if Nexus is empty
-    const finalLegal = legal.length > 0 ? legal : [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Disclaimer", href: "/disclaimer" },
-      { label: "Intellectual Property", href: "/intellectual-property" },
-    ];
-
-    // Build contact column from Website_Settings
-    let contactLinks: any[] = [];
-    try {
-      const settingsData = await getSheetData("Website_Settings");
-      const settingsMap: { [key: string]: string } = {};
-      settingsData.forEach((row: any) => {
-        if (row.Key) settingsMap[row.Key] = row.Value || "";
-      });
       
       // Build contact links from settings
       if (settingsMap.contact_address_line1) {
@@ -139,50 +72,185 @@ export async function GET() {
       if (settingsMap.social_youtube) {
         contactLinks.push({ order: 6, label: "YouTube", href: settingsMap.social_youtube, type: "social" });
       }
+      if (settingsMap.social_tiktok) {
+        contactLinks.push({ order: 7, label: "TikTok", href: settingsMap.social_tiktok, type: "social" });
+      }
     } catch (e) {
-      console.warn("Could not fetch Website_Settings for contact info:", e);
+      console.warn("Could not fetch Website_Settings:", e);
     }
+    
+    // Get footer links from brand-specific sheet (Footer_Links tab)
+    let footerLinks: any[] = [];
+    try {
+      footerLinks = await getSheetData("Footer_Links");
+    } catch (e) {
+      console.warn("Could not fetch Footer_Links from brand sheet:", e);
+    }
+
+    // Known slugs for auto-linking (if href is missing, use these)
+    const autoLinks: { [key: string]: string } = {
+      // Places/Regions
+      'all places': '/places',
+      'cities': '/places?region=cities',
+      'mountains': '/places?region=mountains',
+      'coastal': '/places?region=coastal',
+      'desert': '/places?region=desert',
+      // Journeys
+      'all journeys': '/journeys',
+      'epic journeys': '/epic',
+      'plan your trip': '/plan-your-trip',
+      "what's included": '/whats-included',
+      'whats included': '/whats-included',
+      'faq': '/faq',
+      // About
+      'about': '/about',
+      'about us': '/about',
+      'contact': '/contact',
+      'contact us': '/contact',
+      // Country info
+      'visa info': '/visa-info',
+      'visa information': '/visa-info',
+      'health & safety': '/health-safety',
+      'health and safety': '/health-safety',
+      'travel insurance': '/travel-insurance',
+      'cancellation policy': '/cancellation-policy',
+    };
+
+    // Group links by column
+    const columnMap: { [key: number]: any } = {};
+    
+    footerLinks.forEach((link: any) => {
+      const colNum = parseInt(link.column_number) || 1;
+      if (!columnMap[colNum]) {
+        columnMap[colNum] = {
+          number: colNum,
+          title: link.column_title || "",
+          links: [],
+        };
+      }
+      
+      // Auto-generate href for known labels if missing
+      let href = link.link_href || null;
+      const labelLower = (link.link_label || "").toLowerCase().trim();
+      if (!href && autoLinks[labelLower]) {
+        href = autoLinks[labelLower];
+      }
+      
+      columnMap[colNum].links.push({
+        order: parseInt(link.link_order) || 0,
+        label: link.link_label || "",
+        href: href,
+        type: link.link_type || "link",
+      });
+    });
+
+    // Sort links within each column
+    Object.values(columnMap).forEach((col: any) => {
+      col.links.sort((a: any, b: any) => a.order - b.order);
+      
+      // If this is a "Places" column and doesn't have "All Places", add it at the top
+      if (col.title.toLowerCase() === 'places') {
+        const hasAllPlaces = col.links.some((l: any) => 
+          l.label.toLowerCase() === 'all places'
+        );
+        if (!hasAllPlaces) {
+          col.links.unshift({
+            order: 0,
+            label: 'All Places',
+            href: '/places',
+            type: 'link',
+          });
+        }
+      }
+    });
+
+    // Convert to sorted array
+    const columns = Object.values(columnMap).sort((a: any, b: any) => a.number - b.number);
+
+    // Get legal pages from Nexus (shared across all brands)
+    let legal: any[] = [];
+    try {
+      const legalPages = await getNexusData("Nexus_Legal_Pages");
+      const siteLegalPages = legalPages.filter((p: any) => 
+        !p.brand_id || p.brand_id === SITE_ID || p.brand_id === "all"
+      );
+      legal = siteLegalPages
+        .filter((p: any) => p.page_slug && p.page_title)
+        .map((p: any) => ({
+          label: p.page_title,
+          href: `/${p.page_slug}`,
+        }));
+    } catch (e) {
+      console.warn("Could not fetch legal pages from Nexus:", e);
+    }
+
+    // Fallback legal if Nexus is empty
+    const finalLegal = legal.length > 0 ? legal : [
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Disclaimer", href: "/disclaimer" },
+      { label: "Intellectual Property", href: "/intellectual-property" },
+    ];
 
     // Get site name for "About [Country]" column title
     const countryName = newsletterConfig.brandName.replace('Slow ', '') || 'Us';
 
-    // Fallback columns if Nexus is empty
-    const finalColumns = columns.length > 0 ? columns : [
-      {
-        number: 1,
-        title: "Contact",
-        links: contactLinks.length > 0 ? contactLinks : [
-          { order: 1, label: "Contact us", href: "/contact", type: "link" },
-        ],
-      },
-      {
-        number: 2,
-        title: "About Us",
-        links: [
-          { order: 1, label: "What We Offer", href: "/about", type: "link" },
-          { order: 2, label: "Contact Us", href: "/contact", type: "link" },
-        ],
-      },
-      {
-        number: 3,
-        title: "Journeys",
-        links: [
-          { order: 1, label: "Plan Your Trip", href: "/plan-your-trip", type: "link" },
-          { order: 2, label: "What's Included", href: "/whats-included", type: "link" },
-          { order: 3, label: "Cancellation Policy", href: "/cancellation-policy", type: "link" },
-          { order: 4, label: "FAQ", href: "/faq", type: "link" },
-        ],
-      },
-      {
-        number: 4,
-        title: `About ${countryName}`,
-        links: [
-          { order: 1, label: "Visa Info", href: "/visa-info", type: "link" },
-          { order: 2, label: "Health & Safety", href: "/health-safety", type: "link" },
-          { order: 3, label: "Travel Insurance", href: "/travel-insurance", type: "link" },
-        ],
-      },
-    ];
+    // ALWAYS build Column 1 (Contact/Brand) from Website_Settings
+    // This column has logo, blurb, address, social icons
+    const contactColumn = {
+      number: 1,
+      title: "Contact", // Footer component replaces this with logo
+      links: contactLinks.length > 0 ? contactLinks : [
+        { order: 1, label: "Contact us", href: "/contact", type: "link" },
+      ],
+    };
+
+    // Build final columns array
+    let finalColumns: any[] = [];
+    
+    if (columns.length > 0) {
+      // If Footer_Links has data, ensure Column 1 is always the contact column
+      // and other columns come from the sheet (starting at column 2)
+      finalColumns = [contactColumn, ...columns];
+    } else {
+      // Fallback columns if brand sheet Footer_Links is empty
+      finalColumns = [
+        contactColumn,
+        {
+          number: 2,
+          title: "Places",
+          links: [
+            { order: 1, label: "All Places", href: "/places", type: "link" },
+            { order: 2, label: "Cities", href: "/places?region=cities", type: "link" },
+            { order: 3, label: "Mountains", href: "/places?region=mountains", type: "link" },
+            { order: 4, label: "Coastal", href: "/places?region=coastal", type: "link" },
+            { order: 5, label: "Desert", href: "/places?region=desert", type: "link" },
+          ],
+        },
+        {
+          number: 3,
+          title: "Journeys",
+          links: [
+            { order: 1, label: "All Journeys", href: "/journeys", type: "link" },
+            { order: 2, label: "Plan Your Trip", href: "/plan-your-trip", type: "link" },
+            { order: 3, label: "What's Included", href: "/whats-included", type: "link" },
+            { order: 4, label: "FAQ", href: "/faq", type: "link" },
+            { order: 5, label: "About Us", href: "/about", type: "link" },
+            { order: 6, label: "Contact Us", href: "/contact", type: "link" },
+          ],
+        },
+        {
+          number: 4,
+          title: `About ${countryName}`,
+          links: [
+            { order: 1, label: "Visa Info", href: "/visa-info", type: "link" },
+            { order: 2, label: "Health & Safety", href: "/health-safety", type: "link" },
+            { order: 3, label: "Travel Insurance", href: "/travel-insurance", type: "link" },
+            { order: 4, label: "Cancellation Policy", href: "/cancellation-policy", type: "link" },
+          ],
+        },
+      ];
+    }
 
     const footerData = {
       brandId: SITE_ID,
@@ -191,7 +259,7 @@ export async function GET() {
       legal: finalLegal,
       copyright: {
         year: new Date().getFullYear(),
-        name: siteInfo.site_name || "Slow Morocco",
+        name: newsletterConfig.brandName,
       },
     };
 
@@ -209,7 +277,7 @@ export async function GET() {
   } catch (error: any) {
     console.error("Footer fetch error:", error);
     
-    // Return fallback on error - no image
+    // Return fallback on error
     return NextResponse.json({
       success: true,
       data: {
@@ -217,18 +285,36 @@ export async function GET() {
         newsletter: {
           show: true,
           backgroundImage: "",
-          title: "Notes from Morocco",
+          title: "Notes from Mauritius",
           description: "Quiet. Irregular. Real.",
-          brandName: "Slow Morocco",
+          brandName: "Slow Mauritius",
         },
         columns: [
           {
             number: 1,
             title: "Contact",
             links: [
-              { order: 1, label: "35 Derb Fhal Zfriti", href: null, type: "address" },
-              { order: 2, label: "Marrakech Morocco", href: null, type: "address" },
-              { order: 3, label: "+212 6 18 07 04 50", href: "https://wa.me/212618070450", type: "whatsapp" },
+              { order: 1, label: "Contact us", href: "/contact", type: "link" },
+            ],
+          },
+          {
+            number: 2,
+            title: "Places",
+            links: [
+              { order: 1, label: "All Places", href: "/places", type: "link" },
+              { order: 2, label: "Cities", href: "/places?region=cities", type: "link" },
+              { order: 3, label: "Mountains", href: "/places?region=mountains", type: "link" },
+              { order: 4, label: "Coastal", href: "/places?region=coastal", type: "link" },
+              { order: 5, label: "Desert", href: "/places?region=desert", type: "link" },
+            ],
+          },
+          {
+            number: 3,
+            title: "Journeys",
+            links: [
+              { order: 1, label: "All Journeys", href: "/journeys", type: "link" },
+              { order: 2, label: "Plan Your Trip", href: "/plan-your-trip", type: "link" },
+              { order: 3, label: "FAQ", href: "/faq", type: "link" },
             ],
           },
         ],
@@ -239,7 +325,7 @@ export async function GET() {
         ],
         copyright: {
           year: new Date().getFullYear(),
-          name: "Slow Morocco",
+          name: "Slow Mauritius",
         },
       },
     });
