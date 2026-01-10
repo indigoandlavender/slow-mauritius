@@ -59,7 +59,7 @@ export async function GET() {
 
     return NextResponse.json({ 
       success: true, 
-      data: storiesWithImages 
+      stories: storiesWithImages 
     });
   } catch (error) {
     console.error("Error fetching stories:", error);
