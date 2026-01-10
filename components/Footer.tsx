@@ -69,12 +69,12 @@ interface SiteConfig {
   parentBrand?: string; // For "Powered by" - only moons and microsites
 }
 
-// Slow Morocco is a Planet (commercial)
+// Slow Mauritius is a Planet (commercial)
 const siteConfig: SiteConfig = {
-  siteId: "slow-morocco",
+  siteId: "slow-mauritius",
   siteType: "planet",
   siteCategory: "commercial",
-  brandName: "Slow Morocco",
+  brandName: "Slow Mauritius",
   // No parentBrand - planets are the parent
 };
 
@@ -113,7 +113,7 @@ interface FooterData {
 const defaultFooterData: FooterData = {
   newsletter: {
     backgroundImage: "",
-    title: "Notes from Morocco",
+    title: "Notes from Mauritius",
     description: "Quiet. Irregular. Real.",
   },
   columns: [
@@ -121,12 +121,10 @@ const defaultFooterData: FooterData = {
       number: 1,
       title: "Contact",
       links: [
-        { order: 1, label: "35 Derb Fhal Zfriti", href: null, type: "address" },
-        { order: 2, label: "Marrakech Morocco", href: null, type: "address" },
-        { order: 3, label: "+212 6 18 07 04 50", href: "https://wa.me/212618070450", type: "whatsapp" },
-        { order: 4, label: "Pinterest", href: null, type: "social" },
-        { order: 5, label: "Instagram", href: null, type: "social" },
-        { order: 6, label: "YouTube", href: null, type: "social" },
+        { order: 1, label: "Port Louis", href: null, type: "address" },
+        { order: 2, label: "Mauritius", href: null, type: "address" },
+        { order: 3, label: "Pinterest", href: null, type: "social" },
+        { order: 4, label: "Instagram", href: null, type: "social" },
       ],
     },
     {
@@ -140,22 +138,20 @@ const defaultFooterData: FooterData = {
     },
     {
       number: 3,
-      title: "Journeys",
+      title: "Discover",
       links: [
-        { order: 1, label: "All Journeys", href: "/journeys", type: "link" },
-        { order: 2, label: "Plan Your Trip", href: "/plan-your-trip", type: "link" },
-        { order: 3, label: "What's Included", href: "/whats-included", type: "link" },
-        { order: 4, label: "FAQ", href: "/faq", type: "link" },
+        { order: 1, label: "Stories", href: "/stories", type: "link" },
+        { order: 2, label: "Places", href: "/places", type: "link" },
+        { order: 3, label: "Journeys", href: "/journeys", type: "link" },
       ],
     },
     {
       number: 4,
       title: "Travel Info",
       links: [
-        { order: 1, label: "Visa Information", href: "/visa-info", type: "link" },
-        { order: 2, label: "Health & Safety", href: "/health-safety", type: "link" },
-        { order: 3, label: "Travel Insurance", href: "/travel-insurance", type: "link" },
-        { order: 4, label: "Cancellation Policy", href: "/cancellation-policy", type: "link" },
+        { order: 1, label: "Plan Your Trip", href: "/plan-your-trip", type: "link" },
+        { order: 2, label: "FAQ", href: "/faq", type: "link" },
+        { order: 3, label: "Cancellation Policy", href: "/cancellation-policy", type: "link" },
       ],
     },
   ],
@@ -314,7 +310,7 @@ export default function Footer() {
                         S L O W
                       </span>
                       <span className="font-serif text-sm tracking-[0.2em] text-white/90 block">
-                        M O R O C C O
+                        M A U R I T I U S
                       </span>
                     </div>
                   ) : (
