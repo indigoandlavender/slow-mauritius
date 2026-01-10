@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import PlaceCard from "@/components/PlaceCard";
+import MauritiusMapWrapper from "@/components/MauritiusMapWrapper";
 import { Search } from "lucide-react";
 
 interface Place {
@@ -113,6 +114,24 @@ function PlacesContent() {
           </div>
         </div>
       </section>
+
+      {/* Map Section */}
+      {places.length > 0 && !loading && (
+        <section className="pb-16">
+          <div className="container mx-auto px-6 lg:px-16">
+            <p className="text-xs tracking-[0.3em] uppercase text-white/40 mb-6">
+              Explore by Location
+            </p>
+            <MauritiusMapWrapper
+              stories={places.map(p => ({
+                slug: p.slug,
+                title: p.name,
+                region: p.region
+              }))}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Search & Filters */}
       <section className="py-8 border-y border-white/10">
