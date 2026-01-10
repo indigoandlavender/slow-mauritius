@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSheetData } from "@/lib/sheets";
+import { getSheetData, convertDriveUrl } from "@/lib/sheets";
 
 export const revalidate = 60;
 
@@ -16,7 +16,7 @@ export async function GET() {
         subtitle: story.subtitle || "",
         category: story.category || "",
         sourceType: story.sourceType || "",
-        heroImage: story.heroImage || "",
+        heroImage: convertDriveUrl(story.heroImage || ""),
         heroCaption: story.heroCaption || "",
         excerpt: story.excerpt || "",
         body: story.body?.replace(/<br>/g, "\n") || "",
@@ -44,7 +44,7 @@ export async function GET() {
         .filter((img: any) => img.story_slug === story.slug)
         .sort((a: any, b: any) => parseInt(a.image_order || "0") - parseInt(b.image_order || "0"))
         .map((img: any) => ({
-          url: img.image_url || "",
+          url: convertDriveUrl(img.image_url || ""),
           caption: img.caption || "",
           alt: img.alt_text || "",
           aspectRatio: img.aspect_ratio || "16:9",

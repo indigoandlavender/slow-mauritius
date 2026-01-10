@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSheetData } from "@/lib/sheets";
+import { getSheetData, convertDriveUrl } from "@/lib/sheets";
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -12,26 +12,17 @@ export async function GET() {
       return NextResponse.json({ places: [] });
     }
 
-    // Get headers and data rows
-    const headers = placesData[0] as string[];
-    const rows = placesData.slice(1);
-
-    // Map rows to objects
-    const places = rows
-      .map((row: unknown[]) => {
-        const place: Record<string, unknown> = {};
-        headers.forEach((header: string, index: number) => {
-          let value = row[index];
-          // Convert <br> tags back to newlines for text fields
-          if (typeof value === "string" && value.includes("<br>")) {
-            value = value.replace(/<br>/g, "\n");
-          }
-          place[header] = value;
-        });
-        return place;
-      })
-      .filter((place: Record<string, unknown>) => place.published === "true" || place.published === true)
-      .sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+    // Filter published and sort by order
+    const places = placesData
+      .filter((place: any) => place.published === "true" || place.published === true)
+      .map((place: any) => ({
+        ...place,
+        heroImage: convertDriveUrl(place.heroImage || ""),
+        // Convert <br> tags back to newlines
+        body: place.body?.replace(/<br>/g, "\n") || "",
+        the_facts: place.the_facts?.replace(/<br>/g, "\n") || "",
+      }))
+      .sort((a: any, b: any) => {
         const orderA = Number(a.order) || 999;
         const orderB = Number(b.order) || 999;
         return orderA - orderB;

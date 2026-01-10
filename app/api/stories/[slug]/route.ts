@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { convertDriveUrl } from "@/lib/sheets";
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
@@ -57,6 +58,11 @@ export async function GET(
       story[header] = storyRow[index] || "";
     });
 
+    // Convert heroImage URL
+    if (story.heroImage) {
+      story.heroImage = convertDriveUrl(story.heroImage);
+    }
+
     // Convert <br> tags to newlines in body
     if (story.body) {
       story.body = story.body.replace(/<br\s*\/?>/gi, "\n");
@@ -80,7 +86,7 @@ export async function GET(
           .map((row) => ({
             story_slug: row[imagesHeaders.indexOf("story_slug")] || "",
             image_order: parseInt(row[imagesHeaders.indexOf("image_order")] || "0", 10),
-            image_url: row[imagesHeaders.indexOf("image_url")] || "",
+            image_url: convertDriveUrl(row[imagesHeaders.indexOf("image_url")] || ""),
             caption: row[imagesHeaders.indexOf("caption")] || "",
             alt_text: row[imagesHeaders.indexOf("alt_text")] || "",
             aspect_ratio: row[imagesHeaders.indexOf("aspect_ratio")] || "16:9",

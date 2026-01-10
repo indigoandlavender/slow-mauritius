@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
+import { convertDriveUrl } from "@/lib/sheets";
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
@@ -46,6 +47,11 @@ export async function GET(
     placesHeaders.forEach((header: string, index: number) => {
       place[header] = placeRow[index] || "";
     });
+
+    // Convert heroImage URL
+    if (place.heroImage) {
+      place.heroImage = convertDriveUrl(place.heroImage);
+    }
 
     // Convert <br> tags to newlines in body
     if (place.body) {
