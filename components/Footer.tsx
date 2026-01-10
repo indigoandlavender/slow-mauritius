@@ -287,7 +287,7 @@ export default function Footer() {
           - SHOW for all sites
           - Brand-specific navigation columns
           ════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-20 bg-foreground text-white">
+      <section className="py-16 md:py-20 bg-[#1a1a1a] text-white">
         <div className="container mx-auto px-6 lg:px-16">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {footerData.columns.map((column, index) => {
@@ -388,7 +388,7 @@ export default function Footer() {
           - Disclaimer sentence for content sites only
           - Copyright
           ════════════════════════════════════════════════════════════════════ */}
-      <section className="py-6 bg-foreground border-t border-white/10">
+      <section className="py-6 bg-[#232323]">
         <div className="container mx-auto px-6 lg:px-16">
           {/* Disclaimer for content sites */}
           {showDisclaimer && (
@@ -470,7 +470,7 @@ export default function Footer() {
           - SHOW for Moons and Microsites
           ════════════════════════════════════════════════════════════════════ */}
       {showPoweredBy && siteConfig.parentBrand && (
-        <section className="py-3 bg-foreground border-t border-white/10">
+        <section className="py-3 bg-[#2a2a2a]">
           <div className="container mx-auto px-6 lg:px-16">
             <p className="text-center text-xs text-white/30">
               Powered by{" "}
