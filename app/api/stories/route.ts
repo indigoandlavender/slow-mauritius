@@ -28,8 +28,8 @@ export async function GET() {
         organizations: story.organizations || "",
         the_facts: story.the_facts?.replace(/<br>/g, "\n") || "",
         tags: story.tags || "",
-        featured: story.featured?.toLowerCase() === "true",
-        published: true,
+        featured: story.featured || "",
+        published: "true",
         order: parseInt(story.order) || 99,
         mj_prompt: story.mj_prompt || "",
       }))
